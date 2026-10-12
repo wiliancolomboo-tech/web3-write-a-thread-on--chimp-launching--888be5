@@ -1,0 +1,34 @@
+flowchart TD
+    subgraph ClientLayer ["Client & Community Layer"]
+        User["User / Trader Wallet (Phantom/Solflare)"]
+        CLI["Enterprise $CHIMP Admin CLI"]
+    end
+
+    subgraph SolanaRuntime ["Solana Runtime (Mainnet-Beta)"]
+        direction TB
+        AnchorEngine["$CHIMP Launchpad Engine (Program ID: Ch1mpLaunch111111111111111111111111111111111)"]
+        MplCore["Metaplex Core Program (CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4P8TQ56y)"]
+        SPLVault["$CHIMP Token Vault (Token-2022 / SPL)"]
+        
+        User -->|"1. Invoke MintWithProof (Merkle Leaf + SOL)"| AnchorEngine
+        CLI -->|"Admin: Initialize Collection & Phase Settings"| AnchorEngine
+        AnchorEngine -->|"2. CPI: Create Core Asset V1"| MplCore
+        AnchorEngine -->|"3. Transfer Treasury / Mint $CHIMP Kickback"| SPLVault
+    end
+
+    subgraph IndexerStream ["Enterprise Ingestion Pipeline"]
+        HeliusRPC["Helius / Triton Enhanced Websockets (geyser-plugin)"]
+        Worker["$CHIMP Event Stream Daemon (Node.js/TS Engine)"]
+        MplCore -.->|"On-Chain Event Logs"| HeliusRPC
+        HeliusRPC -->|"Raw Account / TX Logs"| Worker
+    end
+
+    subgraph EnterpriseDispatch ["Enterprise Alerting & Telemetry"]
+        DiscordRelay["Discord Operations Channel (Webhook)"]
+        SlackRelay["Enterprise Incident Desk (Webhook)"]
+        PromMetrics["Prometheus / Grafana Exporter"]
+        
+        Worker -->|"Formed Payload: Mint Confirmation"| DiscordRelay
+        Worker -->|"Alert: Threshold Breach / Admin Action"| SlackRelay
+        Worker -->|"Emit Counter: TPS / Volume / Gas"| PromMetrics
+    end
