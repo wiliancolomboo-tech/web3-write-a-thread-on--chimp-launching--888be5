@@ -1,0 +1,5 @@
+1/3 🚨 Breaking down the next frontier of Solana asset standards: $CHIMP is officially launching on @metaplex Core! By ditching 3-account legacy metadata for Metaplex Core's unified 1-account model, we slash mint costs by 85% and shrink compute to ~35k CU. Here's why this changes everything 🧵👇
+
+2/3 ⚡ Under the hood: $CHIMP integrates Metaplex Core + MPL-Hybrid. Deposit liquid $CHIMP tokens to mint dynamic Core assets equipped with native on-chain Attributes and Royalties plugins. High-throughput drops with zero transaction drops during Solana congestion.
+
+3/3 🛠️ Fully open-source and enterprise-ready: Check out our complete Anchor Rust engine, Umi integration CLI, and automated Discord/Slack telemetry pipeline. Shoutout to @metaplex for empowering builders with Core! Part 2 on Inscriptions dropping soon. 🍌🔥

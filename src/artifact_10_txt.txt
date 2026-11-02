@@ -1,0 +1,8 @@
+LEGACY METAPLEX (SPL)           METAPLEX CORE ($CHIMP)
+┌──────────────┐                ┌────────────────────────┐
+│ Mint Account │                │  Single Base Account   │
+├──────────────┤                │  - Base Metadata       │
+│ Metadata PDA │     vs.        │  - Dynamic Plugins     │
+├──────────────┤                │  - Direct Escrow Hooks │
+│ MasterEdition│                └────────────────────────┘
+└──────────────┘                Rent: 0.0029 SOL (-86.8%)

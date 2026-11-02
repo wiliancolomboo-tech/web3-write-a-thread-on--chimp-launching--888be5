@@ -1,0 +1,110 @@
+[Tweet 1: Hook & Thesis]
+The standard for Solana digital assets has fundamentally changed.
+
+Today, $CHIMP is officially launching on @metaplex Core—Solana’s next-gen digital asset standard.
+
+Why does this matter?
+- 85% lower mint fees
+- Single-account architecture
+- Native plugin composition
+- Sub-40k Compute Units
+
+Here is the technical breakdown of Part 1. 🧵👇
+
+---
+
+[Tweet 2: The Problem with Legacy NFTs]
+Under legacy Token Metadata (Token-2022 / SPL-Token), every single NFT required 3 distinct accounts:
+1. Mint Account
+2. Associated Token Account (ATA)
+3. Metadata & Master Edition Account
+
+Cost? ~0.022 SOL in rent-exemption per mint.
+At 10,000 items, that is ~220 SOL locked up purely in state rent.
+
+---
+
+[Tweet 3: Metaplex Core's 1-Account Revolution]
+Metaplex Core (@metaplex) eliminates account bloat.
+
+Instead of 3 accounts, Core assets reside in ONE single account (`Core11111111111111111111111111111111111111`).
+- Dynamic byte allocation
+- Rent drops to ~0.0029 SOL (~85% cost reduction)
+- Clean, indexable state directly mapped to owner Pubkeys.
+
+$CHIMP passes every fraction of those gas savings back to the community.
+
+---
+
+[Tweet 4: Compute Budget Optimization]
+Legacy NFT mints: 120,000 - 180,000 CU.
+Metaplex Core mints: ~35,000 CU.
+
+By minimizing compute footprint:
+1. Mint transactions land in 1 block (zero dropped txs during high-congestion periods).
+2. Priority fee spikes have zero impact on $CHIMP minters.
+3. Batch transactions can pack up to 4 Core mints in a single Solana tx.
+
+---
+
+[Tweet 5: The Hybrid Escrow Matrix]
+How does $CHIMP bridge fungible SPL tokens and non-fungible Core assets?
+
+Enter our custom Anchor program (`chimp_hybrid_core`).
+Holding liquid $CHIMP? Deposit it into the audited escrow vault to materialize a deterministic Core Chimp Asset.
+Want liquidity? Burn/lock the Core asset to retrieve liquid fungibles on AMMs.
+
+---
+
+[Tweet 6: Native Plugins - No More Clunky Wrappers]
+Metaplex Core introduces Native Plugins stored directly inside asset data:
+- Attributes Plugin: Real on-chain traits (Tier, Generation, XP)
+- Royalties Plugin: Enforced natively at the protocol level (CreMa compliant)
+- Freeze/Transfer Delegate: Programmatic staking without removing assets from cold storage
+
+$CHIMP leverages Core plugins to unlock truly dynamic traits without external indexer dependencies.
+
+---
+
+[Tweet 7: CPI Code Snapshot]
+Our Anchor contract interacts directly with Metaplex Core via Cross-Program Invocation (CPI):
+
+`CreateV1Builder::new()`
+  `.asset(core_asset.key())`
+  `.collection(pool.collection)`
+  `.plugins(attributes)`
+  `.instruction()`
+
+Single atomic execution. Zero dangling state accounts.
+
+---
+
+[Tweet 8: Enterprise Telemetry & Real-Time Indexing]
+$CHIMP's launch infrastructure runs a dedicated Umi agent connected to @heliuslabs Geyser feeds:
+- Real-time mint indexing
+- Instant Slack & Discord incident and milestone dispatching
+- Deterministic verification of Collection PDA proofs
+
+Enterprise reliability from Block 0.
+
+---
+
+[Tweet 9: What's Next in Part 2?]
+In Part 2 of the $CHIMP x Metaplex series, we’ll dive into:
+- Metaplex Inscriptions: Securing $CHIMP art immutably on Solana L1 storage
+- Dynamic trait evolution using Metaplex External Plugin Adapters
+- Liquidity Pool seeding mechanics with Raydium & Meteora
+
+Stay sharp. The jungle is evolving.
+
+---
+
+[Tweet 10: Conclusion & Call to Action]
+Metaplex Core isn't just an upgrade; it's the infrastructure Solana has needed since 2021.
+
+$CHIMP is proud to lead the frontier of hyper-efficient, hybrid assets.
+
+Read the open-source contracts and deploy your own Core pipeline:
+[github.com/chimp-solana/chimp-metaplex-core]
+
+RT & follow @metaplex and $CHIMP to stay ahead. 🍌🚀

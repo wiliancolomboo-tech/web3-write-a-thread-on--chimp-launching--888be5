@@ -1,0 +1,5 @@
+5/7 Looking ahead to Metaplex Core & Token Extensions:
+
+By standardizing our metadata layer with Metaplex from Day 1, $CHIMP is positioned to plug directly into MPL Hybrid and Core indexers for zero-friction DeFi & NFT utility.
+
+More details coming in Part 2! ⚡

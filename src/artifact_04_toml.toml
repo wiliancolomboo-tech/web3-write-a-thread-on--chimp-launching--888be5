@@ -1,0 +1,21 @@
+[package]
+name = "chimp-core-engine"
+version = "0.1.0"
+description = "Metaplex Core Engine for $CHIMP Launch"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "chimp_core_engine"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+
+[dependencies]
+anchor-lang = { version = "0.30.1", features = ["init-if-needed"] }
+mpl-core = { version = "0.7.0" }
+solana-program = "1.18"

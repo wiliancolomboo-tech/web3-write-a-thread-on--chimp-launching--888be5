@@ -1,34 +1,34 @@
 flowchart TD
-    subgraph ClientLayer ["Client & Community Layer"]
-        User["User / Trader Wallet (Phantom/Solflare)"]
-        CLI["Enterprise $CHIMP Admin CLI"]
+    subgraph ClientLayer["Client & Orchestration Layer"]
+        CLI["$CHIMP Automation CLI / Agent"]
+        User["User Wallet / Phantom / Backpack"]
     end
 
-    subgraph SolanaRuntime ["Solana Runtime (Mainnet-Beta)"]
-        direction TB
-        AnchorEngine["$CHIMP Launchpad Engine (Program ID: Ch1mpLaunch111111111111111111111111111111111)"]
-        MplCore["Metaplex Core Program (CoREENxT6tW1HoK8ypY1SxRMZTcVPm7R94rH4P8TQ56y)"]
-        SPLVault["$CHIMP Token Vault (Token-2022 / SPL)"]
-        
-        User -->|"1. Invoke MintWithProof (Merkle Leaf + SOL)"| AnchorEngine
-        CLI -->|"Admin: Initialize Collection & Phase Settings"| AnchorEngine
-        AnchorEngine -->|"2. CPI: Create Core Asset V1"| MplCore
-        AnchorEngine -->|"3. Transfer Treasury / Mint $CHIMP Kickback"| SPLVault
+    subgraph SolanaRuntime["Solana Cluster (Mainnet / Devnet)"]
+        AnchorProgram["$CHIMP Launchpad Program\n(chimp_launchpad)"]
+        MPLCPEngine["Metaplex Core Program\n(Core111111111111111111111111111111111111111)"]
+        AssetAccount["$CHIMP Core Asset Account\n(Single-account Model: Owner + Metadata + Plugins)"]
+        CollectionAccount["$CHIMP Collection PDA\n(Metaplex Core Collection Record)"]
+        VaultPDA["$CHIMP Treasury / Escrow PDA"]
     end
 
-    subgraph IndexerStream ["Enterprise Ingestion Pipeline"]
-        HeliusRPC["Helius / Triton Enhanced Websockets (geyser-plugin)"]
-        Worker["$CHIMP Event Stream Daemon (Node.js/TS Engine)"]
-        MplCore -.->|"On-Chain Event Logs"| HeliusRPC
-        HeliusRPC -->|"Raw Account / TX Logs"| Worker
+    subgraph IndexerWebhook["Enterprise Ingestion & Observability"]
+        GeyserRPC["Solana RPC / Helius Geyser WebSocket"]
+        RelayerService["$CHIMP Event Daemon & Telemetry Worker"]
+        DiscordWebhook["Discord Community Alert Webhook"]
+        SlackWebhook["Slack Enterprise Ops Alert Webhook"]
+        ResendAPI["Resend Enterprise Email Service"]
     end
 
-    subgraph EnterpriseDispatch ["Enterprise Alerting & Telemetry"]
-        DiscordRelay["Discord Operations Channel (Webhook)"]
-        SlackRelay["Enterprise Incident Desk (Webhook)"]
-        PromMetrics["Prometheus / Grafana Exporter"]
-        
-        Worker -->|"Formed Payload: Mint Confirmation"| DiscordRelay
-        Worker -->|"Alert: Threshold Breach / Admin Action"| SlackRelay
-        Worker -->|"Emit Counter: TPS / Volume / Gas"| PromMetrics
-    end
+    User -->|"1. Invoke mint_chimp_asset(plugin_configs)"| AnchorProgram
+    CLI -->|"Admin: Initialize Collection"| AnchorProgram
+    AnchorProgram -->|"2. CPI: mpl_core::instructions::CreateV2"| MPLCPEngine
+    MPLCPEngine -->|"3. Allocate & Write Single Account"| AssetAccount
+    MPLCPEngine -->|"4. Increment Collection Size & Validate"| CollectionAccount
+    AnchorProgram -->|"5. Route Platform & Royalties"| VaultPDA
+
+    AssetAccount -.->|"6. Stream Commitment Updates"| GeyserRPC
+    GeyserRPC -->|"7. Real-Time Account Subscription"| RelayerService
+    RelayerService -->|"8a. Dispatch Embeds"| DiscordWebhook
+    RelayerService -->|"8b. Dispatch Ops Alerts"| SlackWebhook
+    RelayerService -->|"8c. Transaction Receipts"| ResendAPI

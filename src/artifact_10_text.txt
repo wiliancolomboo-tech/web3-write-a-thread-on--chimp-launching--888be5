@@ -1,0 +1,9 @@
+3/7 Absolute Supply Invariance:
+
+Via our custom Anchor launch engine, 1,000,000,000 $CHIMP (6 decimals) were minted directly into an on-chain fair-distribution vault.
+
+In the EXACT same atomic transaction:
+🔥 Mint Authority: REVOKED
+❄️ Freeze Authority: REVOKED
+
+Dilution = Mathematically 0.

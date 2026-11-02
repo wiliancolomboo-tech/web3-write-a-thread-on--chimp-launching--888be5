@@ -1,0 +1,5 @@
+### Emergency Stop Procedure (Circuit Breaker)
+In case of anomalous DEX market activity, upstream RPC fork, or unexpected vault drain:
+
+1. Pause Invocations:
+   Execute `set_paused(true)` via CLI within 1 transaction block:

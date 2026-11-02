@@ -1,0 +1,6 @@
+2/ By adopting @metaplex Core (`mpl-core`), $CHIMP introduces:
+⚡ 0.0029 SOL mint cost (sub-penny footprint)
+🛡️ Native Royalty Plugins enforced at the account level (no brittle wrapper contracts)
+⚡ Direct Anchor CPI integration with slot-hash anti-snipe guardrails
+
+See the on-chain CPI flow below 🔍👇

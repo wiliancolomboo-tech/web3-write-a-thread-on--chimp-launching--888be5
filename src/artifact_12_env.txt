@@ -1,0 +1,6 @@
+SOLANA_RPC_URL=https://api.devnet.solana.com
+ADMIN_KEYPAIR_PATH=/etc/secrets/id.json
+DISCORD_WEBHOOK_URL=https://api.example.com/webhooks/alerts/placeholder
+RESEND_API_KEY=re_enterprise_key_here
+ALERT_EMAIL_RECIPIENT=security@protocol.xyz
+PORT=8080

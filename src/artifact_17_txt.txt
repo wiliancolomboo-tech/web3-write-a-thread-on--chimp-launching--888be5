@@ -1,0 +1,5 @@
+2/ Why does this matter for $CHIMP holders and builders?
+
+⚡ Atomic verification: Dynamic attributes & royalties packed right into L1 state.
+🛡️ Plugin power: Transfer delegates & rule sets without clunky wrapping programs.
+🔥 Instant liquidity & DeFi alignment through Token-2022 compatibility.

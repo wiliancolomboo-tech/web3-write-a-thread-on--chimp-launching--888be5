@@ -1,0 +1,7 @@
+2/7 Deterministic Metadata Resolution:
+
+$CHIMP binds its metadata directly to the Token Metadata Program (`metaqbxx...`).
+The metadata PDA is derived deterministically:
+`['metadata', MPL_PROGRAM_ID, ChimpMint]`
+
+No spoofing. No copycat tickers. Immutably verified by Solana runtime. 🛡️

@@ -1,0 +1,7 @@
+{
+  "status": "UP",
+  "uptimeSeconds": 14289,
+  "cluster": "solana-mainnet",
+  "escrowProgramId": "ChimpCoreEscrow11111111111111111111111111111111",
+  "activeRpcLatencyMs": 42
+}

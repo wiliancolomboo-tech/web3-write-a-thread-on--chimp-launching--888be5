@@ -1,0 +1,5 @@
+3/ Complete with verified Merkle-allowlists, real-time webhook telemetry across Discord & Slack, and turnkey Docker deployment. 
+
+$CHIMP is demonstrating how Solana projects scale cleanly without MEV leakage or ledger bloat.
+
+Part 1 is live! Check our open-source architecture & contracts: [github.com/chimp-solana/chimp-metaplex-launcher] 🍌🚀

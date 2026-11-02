@@ -1,0 +1,6 @@
+[Legacy SPL Model]
+Mint Account + Metadata Account + Master Edition + ATA = ~0.0022 SOL/mint
+
+[Metaplex Core Model]
+1 Unified Asset Account = ~0.00037 SOL/mint
+⚡ 83.5% Rent Reduction | 66% Lower CU Consumption

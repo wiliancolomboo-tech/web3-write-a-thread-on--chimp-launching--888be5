@@ -1,0 +1,28 @@
+{
+  "name": "chimp-metaplex-launch",
+  "version": "1.0.0",
+  "description": "Production Engine and Syndicator for $CHIMP on Metaplex Core",
+  "main": "dist/coreEngine.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/coreEngine.ts",
+    "publish-thread": "ts-node src/threadPublisher.ts",
+    "test": "jest --runInBand --detectOpenHandles"
+  },
+  "dependencies": {
+    "@metaplex-foundation/mpl-core": "^1.1.1",
+    "@metaplex-foundation/umi": "^0.9.2",
+    "@metaplex-foundation/umi-bundle-defaults": "^0.9.2",
+    "@solana/web3.js": "^1.91.8",
+    "axios": "^1.6.8",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.12.7",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}

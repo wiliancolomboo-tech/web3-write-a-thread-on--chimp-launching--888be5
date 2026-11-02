@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  chimp-orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: on-failure
+    environment:
+      - SOLANA_RPC_URL=https://api.devnet.solana.com
+      - PAYER_KEYPAIR_PATH=/usr/src/app/keys/payer.json
+      - CHIMP_PROGRAM_ID=Ch1mpLaunchPad1111111111111111111111111111
+      - DISCORD_WEBHOOK_URL=https://api.example.com/webhooks/alerts/placeholder
+      - SLACK_WEBHOOK_URL=https://api.example.com/webhooks/alerts/placeholder
+    volumes:
+      - ./keys:/usr/src/app/keys:ro

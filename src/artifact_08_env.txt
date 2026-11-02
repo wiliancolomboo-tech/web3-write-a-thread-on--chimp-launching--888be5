@@ -1,0 +1,4 @@
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+DEPLOYER_SECRET_KEY=YOUR_BASE58_PRIVATE_KEY_HERE
+DISCORD_WEBHOOK_URL=https://api.example.com/webhooks/alerts/placeholder
+SLACK_WEBHOOK_URL=https://api.example.com/webhooks/alerts/placeholder

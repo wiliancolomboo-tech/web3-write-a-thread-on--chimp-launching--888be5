@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  chimp-metaplex-orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}
+      - SOLANA_WSS_URL=wss://mainnet.helius-rpc.com/?api-key=${HELIUS_API_KEY}
+      - ESCROW_PROGRAM_ID=Ch1mpEscrow111111111111111111111111111111111
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - ADMIN_ALERT_EMAIL=ops@chimp.so
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+    healthcheck:
+      test: ["CMD", "node", "-e", "process.exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

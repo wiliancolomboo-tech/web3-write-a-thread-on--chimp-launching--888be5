@@ -1,0 +1,38 @@
+flowchart TD
+    subgraph ClientLayer ["1. Client & Investor Layer"]
+        User["User / Trader"]
+        Admin["$CHIMP Treasury Admin"]
+    end
+
+    subgraph LaunchEngine ["2. On-Chain Solana Anchor Engine (chimp_launchpad)"]
+        Config["Launch Config State Account (PDA)"]
+        Vault["Treasury Reserve Vault (PDA)"]
+        Guard["Whitelist Guard (Merkle Root)"]
+        AnchorProg["chimp_launchpad Program"]
+    end
+
+    subgraph MetaplexEcosystem ["3. Metaplex Core & Token Runtime"]
+        MPLCurEngine["Metaplex Core / Token-2022 CPI"]
+        ChimpAsset["$CHIMP Native Core Mint"]
+        PluginReg["Permanent Freeze / Royalties Plugin"]
+    end
+
+    subgraph EnterpriseOps ["4. Enterprise Automation & Event Ingestion"]
+        Worker["Chimp Event Watcher (Node.js/Umi)"]
+        RPC["Solana Geyser / WebSocket RPC"]
+        Slack["Slack / Discord Webhook Pipeline"]
+        Resend["Resend Admin Email Telemetry"]
+    end
+
+    User -->|"1. Submit Mint Tx (Proof + SOL/USDC)"| AnchorProg
+    Admin -->|"Init Launch & Set Merkle Root"| AnchorProg
+    AnchorProg -->|"Validate Proof & Allocation"| Guard
+    AnchorProg -->|"Update Mint Counters & Escrow Funds"| Vault
+    AnchorProg -->|"CPI: Create Asset & Attach Plugins"| MPLCurEngine
+    MPLCurEngine -->|"Mint Unified Account"| ChimpAsset
+    ChimpAsset -->|"Apply Launch Safeguards"| PluginReg
+    
+    ChimpAsset -.->|"Emit Program Log / Event"| RPC
+    RPC -->|"Subscribe logsSubscribe / geyser"| Worker
+    Worker -->|"Send Real-time Alerts"| Slack
+    Worker -->|"Dispatch Audit Metrics"| Resend

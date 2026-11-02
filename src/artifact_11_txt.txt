@@ -1,0 +1,5 @@
++-----------------------------------------------------+
+  | Legacy NFT: 4 Accounts (Mint + Token + Meta + Ed)   |
+  | $CHIMP on Metaplex Core: 1 Unified Asset Account    |
+  | Cost Reduction: >80% Rent Saved (~0.00045 SOL)      |
+  +-----------------------------------------------------+

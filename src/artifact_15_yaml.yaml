@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  chimp-metaplex-orchestrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chimp-metaplex-engine
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - SOLANA_RPC_URL=https://rpc.helius.xyz/?api-key=${HELIUS_API_KEY}
+      - ADMIN_KEYPAIR_PATH=/run/secrets/admin_keypair.json
+      - PROGRAM_ID=ChimpCore11111111111111111111111111111111111
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+    secrets:
+      - admin_keypair.json
+    ports:
+      - "8080:8080"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+secrets:
+  admin_keypair.json:
+    file: ./secrets/id.json

@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  chimp-launcher:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chimp-metaplex-core-agent
+    restart: on-failure
+    environment:
+      - SOLANA_RPC_URL=https://api.devnet.solana.com
+      - CHIMP_PROGRAM_ID=Ch1mpLaunch111111111111111111111111111111111
+      - DISCORD_SLACK_WEBHOOK_URL=${DISCORD_SLACK_WEBHOOK_URL}
+      - DEPLOYER_PRIVATE_KEY=${DEPLOYER_PRIVATE_KEY}
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

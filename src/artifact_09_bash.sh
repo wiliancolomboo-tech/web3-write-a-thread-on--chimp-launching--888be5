@@ -1,0 +1,1 @@
+solana program deploy target/deploy/chimp_launchpad.so --program-id target/deploy/chimp_launchpad-keypair.json --network devnet

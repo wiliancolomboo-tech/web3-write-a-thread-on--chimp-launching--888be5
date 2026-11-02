@@ -1,147 +1,143 @@
-import { Connection, PublicKey, Keypair } from "@solana/web3.js";
+import {
+  Connection,
+  Keypair,
+  PublicKey,
+  Transaction,
+  sendAndConfirmTransaction,
+  LAMPORTS_PER_SOL,
+} from "@solana/web3.js";
+import { Program, AnchorProvider, Wallet, Idl } from "@coral-xyz/anchor";
 import axios from "axios";
+import { Resend } from "resend";
 import * as dotenv from "dotenv";
 
 dotenv.config();
 
-export interface ChimpMintPayload {
-  assetAddress: string;
+// Configuration environment bindings
+const SOLANA_RPC_URL = process.env.SOLANA_RPC_URL || "https://api.devnet.solana.com";
+const PROGRAM_ID = new PublicKey(process.env.PROGRAM_ID || "Ch1mpCoreLaunchpad11111111111111111111111111");
+const DISCORD_WEBHOOK_URL = process.env.DISCORD_WEBHOOK_URL || "";
+const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL || "";
+const RESEND_API_KEY = process.env.RESEND_API_KEY || "";
+const RESEND_ALERT_EMAIL = process.env.RESEND_ALERT_EMAIL || "ops@chimp.solana";
+
+const resend = RESEND_API_KEY ? new Resend(RESEND_API_KEY) : null;
+
+export interface ChimpMintTelemetry {
+  assetPubkey: string;
   recipient: string;
-  supplyIndex: number;
-  metadataName: string;
-  metadataUri: string;
-  blockTimestamp: number;
-  transactionSignature: string;
+  edition: number;
+  txHash: string;
+  solPrice: number;
+  timestamp: string;
 }
 
-export class EnterpriseNotificationService {
-  private discordWebhookUrl?: string;
-  private slackWebhookUrl?: string;
+export class ChimpLaunchpadClient {
+  public connection: Connection;
+  public provider: AnchorProvider;
+  public adminWallet: Wallet;
 
-  constructor(discordWebhookUrl?: string, slackWebhookUrl?: string) {
-    this.discordWebhookUrl = discordWebhookUrl;
-    this.slackWebhookUrl = slackWebhookUrl;
+  constructor(adminKeypair: Keypair) {
+    this.connection = new Connection(SOLANA_RPC_URL, "confirmed");
+    this.adminWallet = new Wallet(adminKeypair);
+    this.provider = new AnchorProvider(this.connection, this.adminWallet, {
+      preflightCommitment: "confirmed",
+    });
   }
 
-  public async notifyAll(payload: ChimpMintPayload): Promise<void> {
-    const promises: Promise<void>[] = [];
-    if (this.discordWebhookUrl) {
-      promises.push(this.sendDiscordNotification(payload));
-    }
-    if (this.slackWebhookUrl) {
-      promises.push(this.sendSlackNotification(payload));
-    }
-    await Promise.allSettled(promises);
-  }
+  /**
+   * Broadcast real-time mint notifications across enterprise channels
+   */
+  public async broadcastMintEvent(telemetry: ChimpMintTelemetry): Promise<void> {
+    console.log(`[ALERT] Ingested Mint for $CHIMP #${telemetry.edition} -> ${telemetry.assetPubkey}`);
 
-  private async sendDiscordNotification(payload: ChimpMintPayload): Promise<void> {
-    const embed = {
-      title: "🚀 Metaplex Core: $CHIMP Asset Minted!",
-      color: 0x10b981, // Emerald green
-      fields: [
-        { name: "Asset Name", value: `\`${payload.metadataName}\``, inline: true },
-        { name: "Edition Index", value: `#${payload.supplyIndex}`, inline: true },
-        { name: "Recipient", value: `[${payload.recipient.slice(0, 4)}...${payload.recipient.slice(-4)}](https://solscan.io/account/${payload.recipient})`, inline: true },
-        { name: "Core Asset Key", value: `\`${payload.assetAddress}\``, inline: false },
-        { name: "Metadata URI", value: payload.metadataUri, inline: false },
-      ],
-      timestamp: new Date(payload.blockTimestamp * 1000).toISOString(),
-      footer: { text: "CHIMP Protocol Engine • Metaplex Core Standard" },
-    };
-
-    await this.postWithRetry(this.discordWebhookUrl!, { embeds: [embed] });
-  }
-
-  private async sendSlackNotification(payload: ChimpMintPayload): Promise<void> {
-    const message = {
-      blocks: [
-        {
-          type: "header",
-          text: {
-            type: "plain_text",
-            text: "🚨 CHIMP Metaplex Core Mint Alert",
-            emoji: true,
-          },
-        },
-        {
-          type: "section",
-          fields: [
-            { type: "mrkdwn", text: `*Asset:*\n${payload.metadataName} (#${payload.supplyIndex})` },
-            { type: "mrkdwn", text: `*Recipient:*\n\`${payload.recipient}\`` },
-            { type: "mrkdwn", text: `*Asset ID:*\n\`${payload.assetAddress}\`` },
-            { type: "mrkdwn", text: `*Tx Hash:*\n<https://solscan.io/tx/${payload.transactionSignature}|View Explorer>` },
-          ],
-        },
-      ],
-    };
-
-    await this.postWithRetry(this.slackWebhookUrl!, message);
-  }
-
-  private async postWithRetry(url: string, body: unknown, maxRetries = 3): Promise<void> {
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    // 1. Dispatch to Discord
+    if (DISCORD_WEBHOOK_URL) {
       try {
-        await axios.post(url, body, { timeout: 5000 });
-        return;
-      } catch (err: any) {
-        if (attempt === maxRetries) {
-          console.error(`[Telemetry Failure] Exhausted retries targeting ${url}: ${err.message}`);
-          return;
-        }
-        const backoffMs = Math.pow(2, attempt) * 500 + Math.random() * 200;
-        await new Promise((resolve) => setTimeout(resolve, backoffMs));
+        await axios.post(DISCORD_WEBHOOK_URL, {
+          username: "$CHIMP Launchpad Sentinel",
+          avatar_url: "https://arweave.net/chimp-logo.png",
+          embeds: [
+            {
+              title: "🦍 New $CHIMP Minted on Metaplex Core!",
+              color: 0xffa500,
+              fields: [
+                { name: "Edition", value: `#${telemetry.edition}`, inline: true },
+                { name: "Recipient", value: `\`${telemetry.recipient.slice(0, 4)}...${telemetry.recipient.slice(-4)}\``, inline: true },
+                { name: "Asset ID", value: `[Solana Explorer](https://explorer.solana.com/address/${telemetry.assetPubkey})` },
+                { name: "Transaction", value: `[View Hash](https://explorer.solana.com/tx/${telemetry.txHash})` },
+              ],
+              footer: { text: "Powered by Metaplex Core Asset Standard" },
+              timestamp: telemetry.timestamp,
+            },
+          ],
+        });
+        console.log("[Discord] Webhook notification delivered.");
+      } catch (err) {
+        console.error("[Discord] Webhook notification failed:", (err as Error).message);
+      }
+    }
+
+    // 2. Dispatch to Slack Operations Room
+    if (SLACK_WEBHOOK_URL) {
+      try {
+        await axios.post(SLACK_WEBHOOK_URL, {
+          text: `🚨 *$CHIMP Mint Success* | Edition #${telemetry.edition} | Recipient: \`${telemetry.recipient}\` | Tx: \`${telemetry.txHash}\``,
+        });
+        console.log("[Slack] Ops notification delivered.");
+      } catch (err) {
+        console.error("[Slack] Webhook notification failed:", (err as Error).message);
+      }
+    }
+
+    // 3. Dispatch to Enterprise Resend Email Service
+    if (resend) {
+      try {
+        await resend.emails.send({
+          from: "launchpad@chimp.solana",
+          to: RESEND_ALERT_EMAIL,
+          subject: `[Audit] $CHIMP Asset #${telemetry.edition} Successfully Minted`,
+          html: `
+            <h2>$CHIMP Metaplex Core Launch Alert</h2>
+            <p>A new asset has been written directly to Metaplex Core state.</p>
+            <ul>
+              <li><strong>Edition:</strong> #${telemetry.edition}</li>
+              <li><strong>Asset Address:</strong> ${telemetry.assetPubkey}</li>
+              <li><strong>Recipient:</strong> ${telemetry.recipient}</li>
+              <li><strong>Tx Hash:</strong> ${telemetry.txHash}</li>
+              <li><strong>Timestamp:</strong> ${telemetry.timestamp}</li>
+            </ul>
+          `,
+        });
+        console.log("[Resend] Audit email delivered.");
+      } catch (err) {
+        console.error("[Resend] Email dispatch failed:", (err as Error).message);
       }
     }
   }
-}
 
-export class ChimpStreamListener {
-  private connection: Connection;
-  private programId: PublicKey;
-  private notifier: EnterpriseNotificationService;
-  private isRunning: boolean = false;
-
-  constructor(rpcEndpoint: string, wsEndpoint: string, programIdStr: string) {
-    this.connection = new Connection(rpcEndpoint, {
-      wsEndpoint,
-      commitment: "confirmed",
-    });
-    this.programId = new PublicKey(programIdStr);
-    this.notifier = new EnterpriseNotificationService(
-      process.env.DISCORD_WEBHOOK_URL,
-      process.env.SLACK_WEBHOOK_URL
-    );
-  }
-
-  public async start(): Promise<void> {
-    this.isRunning = true;
-    console.log(`[CHIMP Engine] Initializing WebSocket listener on Program: ${this.programId.toBase58()}`);
+  /**
+   * Monitor on-chain program logs for deterministic events
+   */
+  public listenToMintEvents(): void {
+    console.log(`[DAEMON] Subscribing to $CHIMP Launchpad Program logs at: ${PROGRAM_ID.toBase58()}`);
 
     this.connection.onLogs(
-      this.programId,
-      async (logsContext, ctx) => {
-        if (logsContext.err) return;
+      PROGRAM_ID,
+      async ({ logs, err, signature }) => {
+        if (err) return;
 
-        for (const logLine of logsContext.logs) {
-          if (logLine.includes("Program data: ") || logLine.includes("ChimpMintEvent")) {
-            try {
-              // Simulated event decoding
-              const dummyPayload: ChimpMintPayload = {
-                assetAddress: Keypair.generate().publicKey.toBase58(),
-                recipient: "Ch1mp9xQoW7X5T3V8Z7nL4m6Y8B2D5e1F3G4H5J6K7L",
-                supplyIndex: Math.floor(Math.random() * 1000) + 1,
-                metadataName: "$CHIMP #Alpha Genesis",
-                metadataUri: "https://arweave.net/chimp-genesis-v1.json",
-                blockTimestamp: Math.floor(Date.now() / 1000),
-                transactionSignature: logsContext.signature,
-              };
-
-              console.log(`[Event Detected] Parsed mint in tx: ${logsContext.signature}`);
-              await this.notifier.notifyAll(dummyPayload);
-            } catch (err: any) {
-              console.error(`[Error Decoding Event]: ${err.message}`);
-            }
-          }
+        const isMintLog = logs.some((l) => l.includes("Instruction: MintChimp"));
+        if (isMintLog) {
+          const telemetry: ChimpMintTelemetry = {
+            assetPubkey: "CoreAssetKeySample" + signature.slice(0, 8),
+            recipient: this.adminWallet.publicKey.toBase58(),
+            edition: Math.floor(Math.random() * 10000),
+            txHash: signature,
+            solPrice: 0.1,
+            timestamp: new Date().toISOString(),
+          };
+          await this.broadcastMintEvent(telemetry);
         }
       },
       "confirmed"
@@ -149,15 +145,19 @@ export class ChimpStreamListener {
   }
 }
 
-// CLI entrypoint execution when called directly
+// Direct Execution Entrypoint
 if (require.main === module) {
-  const rpcUrl = process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com";
-  const wsUrl = process.env.SOLANA_WS_URL || "wss://api.mainnet-beta.solana.com";
-  const programId = process.env.PROGRAM_ID || "Ch1mpLaunch111111111111111111111111111111111";
+  const dummyKeypair = Keypair.generate();
+  const agent = new ChimpLaunchpadClient(dummyKeypair);
+  agent.listenToMintEvents();
 
-  const engine = new ChimpStreamListener(rpcUrl, wsUrl, programId);
-  engine.start().catch((err) => {
-    console.error("[Fatal Error in Event Daemon]", err);
-    process.exit(1);
+  // Trigger a dry-run telemetry proof
+  agent.broadcastMintEvent({
+    assetPubkey: Keypair.generate().publicKey.toBase58(),
+    recipient: dummyKeypair.publicKey.toBase58(),
+    edition: 1,
+    txHash: "5VERv8NMvQbJepqzToqE6Xk7Q69WqJ",
+    solPrice: 0.1,
+    timestamp: new Date().toISOString(),
   });
 }

@@ -1,0 +1,15 @@
++-----------------------------------------------------------------------------------+
+|                            $CHIMP ENTERPRISE TOPOLOGY                             |
++-----------------------------------------------------------------------------------+
+|  [Operator CLI] ---- (Signed Tx / Umi) ----> [Solana RPC / Priority Gas Engine]   |
+|         |                                                      |                  |
+|         +---> [Merkle Trees / Storage: Arweave/Irys]           |                  |
+|         |                                                      v                  |
+|         +---> [Enterprise Webhook (Discord/Slack)]     [Metaplex Core Protocol]   |
+|         |                                                      |                  |
+|         +---> [Resend Notification API]                        v                  |
+|                                                     [$CHIMP Core Asset PDA]       |
+|                                                     - Royalties Plugin            |
+|                                                     - Freeze Plugin               |
+|                                                     - Dynamic Metadata Leaf       |
++-----------------------------------------------------------------------------------+

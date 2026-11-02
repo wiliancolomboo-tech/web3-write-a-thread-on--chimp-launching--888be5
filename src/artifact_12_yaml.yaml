@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  chimp-telemetry-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chimp-telemetry-worker
+    restart: unless-stopped
+    environment:
+      - SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+      - SOLANA_WS_URL=wss://api.mainnet-beta.solana.com
+      - CHIMP_PROGRAM_ID=CHMP1Aun5v8wUjA9N6jV9bC9mZ1xQ4qW9y8rP2vYpump
+      - ENTERPRISE_WEBHOOK_URL=https://api.example.com/webhooks/alerts/placeholder
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"

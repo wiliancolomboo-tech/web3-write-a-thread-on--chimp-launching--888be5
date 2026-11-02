@@ -1,0 +1,15 @@
+.PHONY: build test deploy-devnet deploy-mainnet
+
+build:
+	anchor build
+
+test:
+	anchor test
+
+deploy-devnet:
+	solana config set --url https://api.devnet.solana.com
+	anchor deploy --provider.cluster devnet
+
+deploy-mainnet:
+	solana config set --url https://api.mainnet-beta.solana.com
+	anchor deploy --provider.cluster mainnet --program-keypair target/deploy/chimp_hybrid_launch-keypair.json

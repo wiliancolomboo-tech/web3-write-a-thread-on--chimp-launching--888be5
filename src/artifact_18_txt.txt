@@ -1,0 +1,8 @@
+3/ We have completely open-sourced our deployment engine, Umi scripts, and real-time webhook telemetry.
+
+Read the technical breakdown and prepare for Part 2: The $CHIMP Hybrid Liquidity Model. 🌴
+
+Check our repo & join the revolution:
+https://github.com/chimp-solana/metaplex-launch
+
+Tagging @metaplex 🚀 Let’s cook.

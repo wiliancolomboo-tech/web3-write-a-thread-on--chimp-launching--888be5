@@ -1,0 +1,5 @@
+1/7 🍌 Why launching $CHIMP on @metaplex is the new gold standard for fair-launch tokens on Solana.
+
+Most memecoins leave backdoors: mutable metadata, unverified creators, and active freeze authorities.
+
+Here is the deep-dive on how $CHIMP locks down on-chain cryptographic provenance 👇 🧵

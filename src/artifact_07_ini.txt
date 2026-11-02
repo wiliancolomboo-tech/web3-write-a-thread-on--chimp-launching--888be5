@@ -1,0 +1,7 @@
+SOLANA_RPC_URL=https://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY
+SOLANA_WS_URL=wss://mainnet.helius-rpc.com/?api-key=YOUR_API_KEY
+CHIMP_PROGRAM_ID=CH1MP1aunch111111111111111111111111111111111
+SLACK_WEBHOOK_URL=https://api.example.com/webhooks/alerts/placeholder
+RESEND_API_KEY=re_1234567890abcdef
+NOTIFICATION_EMAIL=alerts@chimp.io
+PORT=8080

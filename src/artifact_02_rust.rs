@@ -1,201 +1,207 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::{
-    keccak,
     program::invoke_signed,
     system_instruction,
 };
-use mpl_core::{
-    instructions::CreateV1Builder,
-    types::{Plugin, PluginAuthority, PluginAuthorityPair, Royalties, RuleSet},
-    ID as MPL_CORE_ID,
-};
 
-declare_id!("Ch1mpLaunch111111111111111111111111111111111");
+declare_id!("Ch1mpCoreLaunchpad11111111111111111111111111");
 
-pub const CONFIG_SEED: &[u8] = b"chimp_config";
-pub const COLLECTION_SEED: &[u8] = b"chimp_collection";
+pub const MPL_CORE_PROGRAM_ID: Pubkey = pubkey!("CoRe1xTViWsNxz93u1xR3d13aY2nWBvWdBMecAijWf9");
 
 #[program]
 pub mod chimp_launchpad {
     use super::*;
 
-    pub fn initialize_launchpad(
-        ctx: Context<InitializeLaunchpad>,
-        merkle_root: [u8; 32],
-        mint_price_lamports: u64,
-        max_supply: u32,
-        seller_fee_basis_points: u16,
-    ) -> Result<()> {
-        let config = &mut ctx.accounts.launchpad_config;
-        config.authority = ctx.accounts.authority.key();
-        config.treasury = ctx.accounts.treasury.key();
-        config.merkle_root = merkle_root;
-        config.mint_price_lamports = mint_price_lamports;
-        config.max_supply = max_supply;
-        config.current_supply = 0;
-        config.seller_fee_basis_points = seller_fee_basis_points;
-        config.is_active = true;
-        config.bump = ctx.bumps.launchpad_config;
-
-        msg!("$CHIMP Launchpad Initialized. Target Supply: {}", max_supply);
-        Ok(())
-    }
-
-    pub fn set_merkle_root(
-        ctx: Context<UpdateConfig>,
-        new_root: [u8; 32],
-    ) -> Result<()> {
-        let config = &mut ctx.accounts.launchpad_config;
-        config.merkle_root = new_root;
-        msg!("Merkle Root updated successfully.");
-        Ok(())
-    }
-
-    pub fn set_active_state(
-        ctx: Context<UpdateConfig>,
-        is_active: bool,
-    ) -> Result<()> {
-        let config = &mut ctx.accounts.launchpad_config;
-        config.is_active = is_active;
-        msg!("Launchpad active state set to: {}", is_active);
-        Ok(())
-    }
-
-    pub fn mint_chimp_core<'info>(
-        ctx: Context<'_, '_, '_, 'info, MintChimpCore<'info>>,
-        proof: Vec<[u8; 32]>,
+    /// Initialize the global $CHIMP Launchpad Config and Collection Record
+    pub fn initialize_collection(
+        ctx: Context<InitializeCollection>,
         name: String,
         uri: String,
     ) -> Result<()> {
-        let config = &mut ctx.accounts.launchpad_config;
+        require!(name.len() <= 32, ChimpError::NameTooLong);
+        require!(uri.len() <= 200, ChimpError::UriTooLong);
 
-        // 1. Boundary & Invariant Checks
-        require!(config.is_active, ChimpError::LaunchpadInactive);
-        require!(config.current_supply < config.max_supply, ChimpError::MaxSupplyReached);
-        require!(name.len() <= 32, ChimpError::InvalidStringLength);
-        require!(uri.len() <= 200, ChimpError::InvalidStringLength);
+        let config = &mut ctx.accounts.config;
+        config.admin = ctx.accounts.admin.key();
+        config.treasury = ctx.accounts.treasury.key();
+        config.collection = ctx.accounts.collection.key();
+        config.mint_price_lamports = 100_000_000; // 0.1 SOL
+        config.total_minted = 0;
+        config.max_supply = 10_000;
+        config.is_paused = false;
+        config.bump = ctx.bumps.config;
 
-        // 2. Cryptographic Merkle Verification (if merkle_root != [0; 32])
-        if config.merkle_root != [0u8; 32] {
-            let user_pubkey = ctx.accounts.payer.key();
-            let leaf = keccak::hashv(&[user_pubkey.as_ref()]).to_bytes();
-            let is_valid = verify_merkle_proof(&proof, config.merkle_root, leaf);
-            require!(is_valid, ChimpError::InvalidMerkleProof);
-        }
+        msg!("$CHIMP Core Collection initialized: {}", ctx.accounts.collection.key());
+        Ok(())
+    }
 
-        // 3. Process Payment to Treasury
-        if config.mint_price_lamports > 0 {
-            invoke_signed(
-                &system_instruction::transfer(
-                    &ctx.accounts.payer.key(),
-                    &ctx.accounts.treasury.key(),
-                    config.mint_price_lamports,
-                ),
-                &[
-                    ctx.accounts.payer.to_account_info(),
-                    ctx.accounts.treasury.to_account_info(),
-                    ctx.accounts.system_program.to_account_info(),
-                ],
-                &[],
-            )?;
-        }
+    /// Mint a $CHIMP Core Asset directly into Metaplex Core single-account storage
+    pub fn mint_chimp(
+        ctx: Context<MintChimp>,
+        asset_name: String,
+        asset_uri: String,
+    ) -> Result<()> {
+        let config = &mut ctx.accounts.config;
+        require!(!config.is_paused, ChimpError::MintPaused);
+        require!(config.total_minted < config.max_supply, ChimpError::SoldOut);
+        require!(asset_name.len() <= 32, ChimpError::NameTooLong);
+        require!(asset_uri.len() <= 200, ChimpError::UriTooLong);
 
-        // 4. CPI to Metaplex Core Program: CreateV1
-        let config_bump = config.bump;
-        let signer_seeds: &[&[&[u8]]] = &[&[CONFIG_SEED, &[config_bump]]];
+        // 1. Collect mint fee and transfer to treasury
+        let fee = config.mint_price_lamports;
+        let transfer_ix = system_instruction::transfer(
+            &ctx.accounts.payer.key(),
+            &ctx.accounts.treasury.key(),
+            fee,
+        );
+        invoke_signed(
+            &transfer_ix,
+            &[
+                ctx.accounts.payer.to_account_info(),
+                ctx.accounts.treasury.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+            ],
+            &[],
+        )?;
 
-        let mut plugins = Vec::new();
-        if config.seller_fee_basis_points > 0 {
-            plugins.push(PluginAuthorityPair {
-                plugin: Plugin::Royalties(Royalties {
-                    basis_points: config.seller_fee_basis_points,
-                    creators: vec![mpl_core::types::Creator {
-                        address: config.treasury,
-                        percentage: 100,
-                    }],
-                    rule_set: RuleSet::None,
-                }),
-                authority: PluginAuthority::None,
-            });
-        }
+        // 2. Derive signer seeds for Collection PDA authority
+        let admin_key = config.admin;
+        let seeds = &[
+            b"chimp_config".as_ref(),
+            admin_key.as_ref(),
+            &[config.bump],
+        ];
+        let signer_seeds = &[&seeds[..]];
 
-        let create_ix = CreateV1Builder::new()
-            .asset(ctx.accounts.asset.key())
-            .collection(Some(ctx.accounts.collection.key()))
-            .authority(ctx.accounts.launchpad_config.key())
-            .payer(ctx.accounts.payer.key())
-            .owner(Some(ctx.accounts.payer.key()))
-            .system_program(ctx.accounts.system_program.key())
-            .name(name.clone())
-            .uri(uri.clone())
-            .plugins(plugins)
-            .instruction();
+        // 3. Assemble MPL Core `CreateV2` Instruction
+        // Account indices for Metaplex Core CreateV2:
+        // 0. Asset (signer/writable)
+        // 1. Collection (optional writable)
+        // 2. Authority (signer)
+        // 3. Payer (signer/writable)
+        // 4. Owner (optional, defaults to payer)
+        // 5. System Program
+        // 6. Log Wrapper (optional)
+        let mut create_data = Vec::with_capacity(256);
+        // Instruction discriminator for CreateV2 in mpl-core is index 1
+        create_data.push(1u8); 
+        
+        // Serialize asset name (Borsh-compatible String)
+        let name_bytes = asset_name.as_bytes();
+        create_data.extend_from_slice(&(name_bytes.len() as u32).to_le_bytes());
+        create_data.extend_from_slice(name_bytes);
 
-        let account_infos = vec![
-            ctx.accounts.asset.to_account_info(),
-            ctx.accounts.collection.to_account_info(),
-            ctx.accounts.launchpad_config.to_account_info(),
-            ctx.accounts.payer.to_account_info(),
-            ctx.accounts.system_program.to_account_info(),
-            ctx.accounts.mpl_core_program.to_account_info(),
+        // Serialize URI (Borsh-compatible String)
+        let uri_bytes = asset_uri.as_bytes();
+        create_data.extend_from_slice(&(uri_bytes.len() as u32).to_le_bytes());
+        create_data.extend_from_slice(uri_bytes);
+
+        let core_accounts = vec![
+            AccountMeta::new(ctx.accounts.asset.key(), true),
+            AccountMeta::new(ctx.accounts.collection.key(), false),
+            AccountMeta::new_readonly(ctx.accounts.config.key(), true),
+            AccountMeta::new(ctx.accounts.payer.key(), true),
+            AccountMeta::new_readonly(ctx.accounts.recipient.key(), false),
+            AccountMeta::new_readonly(ctx.accounts.system_program.key(), false),
         ];
 
-        invoke_signed(&create_ix, &account_infos, signer_seeds)?;
+        let core_instruction = anchor_lang::solana_program::instruction::Instruction {
+            program_id: ctx.accounts.mpl_core_program.key(),
+            accounts: core_accounts,
+            data: create_data,
+        };
 
-        // 5. Update State
-        config.current_supply = config
-            .current_supply
-            .checked_add(1)
-            .ok_or(ChimpError::ArithmeticOverflow)?;
+        invoke_signed(
+            &core_instruction,
+            &[
+                ctx.accounts.asset.to_account_info(),
+                ctx.accounts.collection.to_account_info(),
+                ctx.accounts.config.to_account_info(),
+                ctx.accounts.payer.to_account_info(),
+                ctx.accounts.recipient.to_account_info(),
+                ctx.accounts.system_program.to_account_info(),
+                ctx.accounts.mpl_core_program.to_account_info(),
+            ],
+            signer_seeds,
+        )?;
+
+        // 4. Increment state counter
+        config.total_minted = config.total_minted.checked_add(1).ok_or(ChimpError::Overflow)?;
 
         emit!(ChimpMintEvent {
             asset: ctx.accounts.asset.key(),
-            recipient: ctx.accounts.payer.key(),
-            supply_index: config.current_supply,
-            name,
-            uri,
+            recipient: ctx.accounts.recipient.key(),
+            edition: config.total_minted,
             timestamp: Clock::get()?.unix_timestamp,
         });
 
         Ok(())
     }
-}
 
-// ---------------- Helper Functions ---------------- //
-
-fn verify_merkle_proof(proof: &[[u8; 32]], root: [u8; 32], leaf: [u8; 32]) -> bool {
-    let mut computed_hash = leaf;
-    for proof_element in proof.iter() {
-        if computed_hash <= *proof_element {
-            computed_hash = keccak::hashv(&[&computed_hash, proof_element]).to_bytes();
-        } else {
-            computed_hash = keccak::hashv(&[proof_element, &computed_hash]).to_bytes();
-        }
+    /// Admin Emergency Pause
+    pub fn set_pause(ctx: Context<UpdateConfig>, paused: bool) -> Result<()> {
+        let config = &mut ctx.accounts.config;
+        config.is_paused = paused;
+        Ok(())
     }
-    computed_hash == root
 }
-
-// ---------------- Context Structs ---------------- //
 
 #[derive(Accounts)]
-pub struct InitializeLaunchpad<'info> {
+pub struct InitializeCollection<'info> {
     #[account(
         init,
-        payer = authority,
-        space = 8 + LaunchpadConfig::INIT_SPACE,
-        seeds = [CONFIG_SEED],
+        payer = admin,
+        space = 8 + LaunchpadConfig::LEN,
+        seeds = [b"chimp_config", admin.key().as_ref()],
         bump
     )]
-    pub launchpad_config: Account<'info, LaunchpadConfig>,
+    pub config: Account<'info, LaunchpadConfig>,
 
-    /// CHECK: Metaplex Core Collection account, initialized beforehand or via admin
+    /// CHECK: Metaplex Core Collection account initialized via CLI / Core program
+    #[account(mut)]
     pub collection: UncheckedAccount<'info>,
 
-    /// CHECK: Treasury account receiving mint proceeds
+    /// CHECK: Treasury receiving mint proceeds
+    #[account(mut)]
     pub treasury: UncheckedAccount<'info>,
 
     #[account(mut)]
-    pub authority: Signer<'info>,
+    pub admin: Signer<'info>,
+
+    pub system_program: Program<'info, System>,
+}
+
+#[derive(Accounts)]
+pub struct MintChimp<'info> {
+    #[account(
+        mut,
+        seeds = [b"chimp_config", config.admin.as_ref()],
+        bump = config.bump
+    )]
+    pub config: Account<'info, LaunchpadConfig>,
+
+    /// CHECK: Collection account that the $CHIMP asset will belong to
+    #[account(mut, address = config.collection)]
+    pub collection: UncheckedAccount<'info>,
+
+    /// Signer keypair generated client-side for the new $CHIMP Core asset
+    #[account(mut)]
+    pub asset: Signer<'info>,
+
+    /// CHECK: Recipient of the newly minted $CHIMP asset
+    pub recipient: UncheckedAccount<'info>,
+
+    /// Transaction fee and mint payer
+    #[account(mut)]
+    pub payer: Signer<'info>,
+
+    /// CHECK: Treasury receiving the payment
+    #[account(mut, address = config.treasury)]
+    pub treasury: UncheckedAccount<'info>,
+
+    /// CHECK: Metaplex Core canonical program
+    #[account(address = MPL_CORE_PROGRAM_ID)]
+    pub mpl_core_program: UncheckedAccount<'info>,
 
     pub system_program: Program<'info, System>,
 }
@@ -204,87 +210,48 @@ pub struct InitializeLaunchpad<'info> {
 pub struct UpdateConfig<'info> {
     #[account(
         mut,
-        seeds = [CONFIG_SEED],
-        bump = launchpad_config.bump,
-        has_one = authority @ ChimpError::Unauthorized
+        seeds = [b"chimp_config", admin.key().as_ref()],
+        bump = config.bump,
+        has_one = admin
     )]
-    pub launchpad_config: Account<'info, LaunchpadConfig>,
-    pub authority: Signer<'info>,
+    pub config: Account<'info, LaunchpadConfig>,
+    pub admin: Signer<'info>,
 }
-
-#[derive(Accounts)]
-pub struct MintChimpCore<'info> {
-    #[account(
-        mut,
-        seeds = [CONFIG_SEED],
-        bump = launchpad_config.bump
-    )]
-    pub launchpad_config: Account<'info, LaunchpadConfig>,
-
-    #[account(mut)]
-    pub payer: Signer<'info>,
-
-    #[account(mut)]
-    pub asset: Signer<'info>,
-
-    /// CHECK: Validated in CPI against Metaplex Core program
-    #[account(mut)]
-    pub collection: UncheckedAccount<'info>,
-
-    /// CHECK: Validated against launchpad_config.treasury
-    #[account(
-        mut,
-        address = launchpad_config.treasury @ ChimpError::InvalidTreasuryAccount
-    )]
-    pub treasury: UncheckedAccount<'info>,
-
-    #[account(address = MPL_CORE_ID)]
-    /// CHECK: Metaplex Core native program
-    pub mpl_core_program: UncheckedAccount<'info>,
-
-    pub system_program: Program<'info, System>,
-}
-
-// ---------------- State & Events ---------------- //
 
 #[account]
-#[derive(InitSpace)]
 pub struct LaunchpadConfig {
-    pub authority: Pubkey,
+    pub admin: Pubkey,
     pub treasury: Pubkey,
-    pub merkle_root: [u8; 32],
+    pub collection: Pubkey,
     pub mint_price_lamports: u64,
-    pub max_supply: u32,
-    pub current_supply: u32,
-    pub seller_fee_basis_points: u16,
-    pub is_active: bool,
+    pub total_minted: u64,
+    pub max_supply: u64,
+    pub is_paused: bool,
     pub bump: u8,
+}
+
+impl LaunchpadConfig {
+    pub const LEN: usize = 32 + 32 + 32 + 8 + 8 + 8 + 1 + 1;
 }
 
 #[event]
 pub struct ChimpMintEvent {
     pub asset: Pubkey,
     pub recipient: Pubkey,
-    pub supply_index: u32,
-    pub name: String,
-    pub uri: String,
+    pub edition: u64,
     pub timestamp: i64,
 }
 
 #[error_code]
 pub enum ChimpError {
-    #[msg("Launchpad is currently paused or inactive")]
-    LaunchpadInactive,
-    #[msg("Maximum token supply has already been reached")]
-    MaxSupplyReached,
-    #[msg("Merkle verification failed: Wallet is not whitelisted")]
-    InvalidMerkleProof,
-    #[msg("Provided treasury does not match launchpad configuration")]
-    InvalidTreasuryAccount,
-    #[msg("String exceeds maximum allowable buffer length")]
-    InvalidStringLength,
-    #[msg("Numerical overflow during arithmetic operation")]
-    ArithmeticOverflow,
-    #[msg("Signer does not possess required administrative permissions")]
-    Unauthorized,
+    #[msg("Asset name exceeds 32 byte maximum.")]
+    NameTooLong,
+    #[msg("Asset URI exceeds 200 byte maximum.")]
+    UriTooLong,
+    #[msg("Minting is currently paused by admin.")]
+    MintPaused,
+    #[msg("$CHIMP collection max supply reached.")]
+    SoldOut,
+    #[msg("Numerical arithmetic overflow.")]
+    Overflow,
 }

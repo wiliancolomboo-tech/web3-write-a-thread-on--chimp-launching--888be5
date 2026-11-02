@@ -1,0 +1,17 @@
+FROM node:20-slim AS runner
+
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends openssl ca-certificates && rm -rf /var/lib/apt/lists/*
+
+COPY client/package*.json ./
+RUN npm install --production
+
+COPY client/tsconfig.json ./
+COPY client/src ./src
+
+RUN npm install -g typescript ts-node && tsc
+
+EXPOSE 8080
+ENV NODE_ENV=production
+
+CMD ["node", "dist/chimp_worker.js"]

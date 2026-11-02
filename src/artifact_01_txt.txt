@@ -1,0 +1,10 @@
++-----------------------------------------------------------------------------------------+
+|                                    $CHIMP LAUNCHPAD                                      |
++------------------------------+---------------------------+------------------------------+
+| Metric                       | Legacy SPL + Token Meta   | $CHIMP Metaplex Core Launch |
++------------------------------+---------------------------+------------------------------+
+| Rent per Mint                | ~0.0125 SOL               | ~0.0029 SOL (-76.8%)         |
+| CU per Mint/Verify CPI       | ~48,000 CU                | ~12,500 CU (-74.0%)          |
+| Account Model                | Mint + Meta + MasterEdit  | Single Unified Core Account  |
+| Plug-and-Play Extensibility  | Complex Delegates / Rules | Native Plugin Registry       |
++------------------------------+---------------------------+------------------------------+

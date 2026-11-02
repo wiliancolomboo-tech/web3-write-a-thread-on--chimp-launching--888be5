@@ -1,0 +1,25 @@
+FROM node:20-alpine AS builder
+
+WORKDIR /usr/src/app
+
+COPY client/package*.json ./
+RUN npm ci
+
+COPY client/tsconfig.json ./
+COPY client/src ./src
+COPY target/idl ./target/idl
+RUN npm run build
+
+FROM node:20-alpine
+
+WORKDIR /usr/src/app
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=builder /usr/src/app/target ./target
+COPY --from=builder /usr/src/app/package.json ./
+
+ENV NODE_ENV=production
+ENV SOLANA_RPC=https://api.devnet.solana.com
+
+ENTRYPOINT ["node", "dist/index.js"]
+CMD ["--help"]

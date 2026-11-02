@@ -1,0 +1,77 @@
+1/10
+The Solana digital asset landscape is changing permanently. 
+
+$CHIMP is officially launching on @metaplex Core. 
+
+Forget what you know about legacy SPL tokens and TMv1 NFTs. We're engineering a hybrid digital economy built for scale.
+
+Here is the deep architectural breakdown: 👇🧵
+
+2/10
+Why Metaplex Core?
+Legacy Solana mints lock up ~0.022 SOL per asset across decoupled Mint, Metadata, and Edition accounts.
+
+Metaplex Core (@metaplex) condenses state into a SINGLE account model.
+Result? 
+- 85%+ lower rent footprint
+- Mint costs drops from dollars to pennies.
+
+3/10
+Rent efficiency is just the baseline. The true superpower of Metaplex Core for $CHIMP is the zero-copy Plugin Architecture.
+
+Instead of monolithic upgrade programs, $CHIMP leverages modular plugin hooks:
+⚡ Dynamic on-chain Royalties (enforced at protocol level)
+⚡ Native Attribute Mutability
+⚡ Lifecycle burn & freeze triggers
+
+4/10
+Tokenomics & Hybrid Integration ($CHIMP x MPL-Core):
+How do we bridge the gap between liquid fungible tokens and sovereign digital collectibles?
+
+Through MPL-Hybrid / semi-fungible mechanics, users can escrow fungible $CHIMP to unlock or mutate Metaplex Core digital chimpanzees.
+
+5/10
+Under the hood of the $CHIMP Launchpad:
+We engineered a custom Anchor v0.30 smart contract interacting directly with MPL-Core via CPI:
+
+`CreateV1Cpi::new(...)`
+
+State writes and asset initialization execute in a single atomic transaction without multi-tx staging.
+
+6/10
+Sybil Resistance & Fair Allocation:
+We ditched bot-vulnerable on-chain arrays.
+
+$CHIMP utilizes off-chain Keccak-256 Merkle trees with on-chain cryptographic leaf verification:
+- Zero rent for storing whitelist addresses
+- Proof validation completed within micro-seconds of compute budget (CU).
+
+7/10
+Enterprise-Grade Telemetry:
+A decentralized launch requires real-time observability.
+
+The $CHIMP infrastructure features an event ingestion pipeline that streams on-chain Anchor events (`ChimpMintedEvent`) straight to Discord webhooks, Slack incident channels, and automated telemetry dashboards.
+
+8/10
+Compute Budget Optimization:
+Legacy mint CPIs routinely spiked beyond 100,000 Compute Units.
+
+By stripping out legacy token program bloat, the $CHIMP Core mint routine runs smoothly between 18,000 and 32,000 CU. Fast confirms, zero failed transactions during peak network load.
+
+9/10
+Security & Auditing:
+🔒 Authority-governed emergency pause
+🔒 Explicit PDA ownership over the treasury
+🔒 Checked arithmetic on all supply counters
+🔒 Hard zero-unsafe guarantees on account deserialization
+
+Treasury funds remain locked inside isolated PDAs until programmatic release.
+
+10/10
+This is only Part 1. 
+
+We’ve covered the core engine, the Metaplex Core CPI primitives, and the rent economics powering $CHIMP.
+
+In Part 2, we’ll dive into the Hybrid Staking mechanism and Dynamic Metadata evolution.
+
+RT & follow to stay in the canopy. 🍌🦍

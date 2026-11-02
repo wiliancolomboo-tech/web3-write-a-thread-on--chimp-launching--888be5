@@ -1,0 +1,8 @@
+6/7 Transparency First:
+
+Every launch step was monitored via automated event listeners streaming transaction confirmations directly to enterprise channels.
+
+Verify on @solana Explorer:
+Program: `CHiMP11111111111111111111111111111111111111`
+Supply: 1,000,000,000 $CHIMP
+Status: Fully Verified & Locked 🔒

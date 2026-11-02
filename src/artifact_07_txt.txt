@@ -1,0 +1,10 @@
++-------------+-----------------------------------+--------------------+------------------+
+| Test ID     | Test Case Description             | Target Assertion   | Expected Status  |
++-------------+-----------------------------------+--------------------+------------------+
+| TC-CORE-001 | Engine Instantiation & Auth Load  | Keypair Valid      | PASS             |
+| TC-CORE-002 | Single Account Allocation Size    | Byte length < 400B | PASS             |
+| TC-CORE-003 | Royalties Plugin Deserialization  | 500 bps Enforced   | PASS             |
+| TC-CORE-004 | Native Attributes List Validation | Strict Schema OK   | PASS             |
+| TC-CORE-005 | Priority Fee Injection Check      | Compute Budget CPI | PASS             |
+| TC-CORE-006 | Network Timeout Resilience        | Retry on 429 / 503 | PASS             |
++-------------+-----------------------------------+--------------------+------------------+

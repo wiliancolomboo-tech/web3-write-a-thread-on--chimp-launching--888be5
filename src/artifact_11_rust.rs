@@ -1,0 +1,9 @@
+CreateV1Builder::new()
+    .asset(ctx.accounts.core_asset.key())
+    .collection(Some(escrow.collection))
+    .authority(Some(escrow.key()))
+    .payer(ctx.accounts.user.key())
+    .owner(Some(ctx.accounts.user.key()))
+    .name(asset_name)
+    .uri(asset_uri)
+    .invoke_signed(signer_seeds)?;

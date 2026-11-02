@@ -1,0 +1,7 @@
+🍌 The next evolution of Solana assets is here.
+
+$CHIMP is officially launching on @metaplex Core! 🐒
+
+Legacy Token Metadata required 4 separate accounts (mint, token, metadata, master edition) + ~0.022 SOL rent.
+
+Metaplex Core changes the game: 1 single account. 85% cheaper mints. Zero bloat. 🧵👇

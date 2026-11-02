@@ -1,0 +1,25 @@
+FROM node:20-bullseye-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    python3 \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY package.json yarn.lock tsconfig.json ./
+RUN yarn install --frozen-lockfile
+
+COPY orchestrator ./orchestrator
+COPY scripts ./scripts
+
+RUN yarn build
+
+EXPOSE 8080
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8080/health || exit 1
+
+CMD ["yarn", "start"]

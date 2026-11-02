@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  chimp-sentinel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chimp-metaplex-sentinel
+    restart: unless-stopped
+    environment:
+      - SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+      - PROGRAM_ID=CHiMPcoRE1111111111111111111111111111111111
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+      - RESEND_API_KEY=${RESEND_API_KEY}
+      - ALERT_EMAIL=admin@chimp.so
+    ports:
+      - "8080:8080"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"

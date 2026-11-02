@@ -1,0 +1,5 @@
+4/7 The "Mutable Metadata" Rug Attack Vector:
+
+Standard tokens leave `is_mutable: true` to update URIs later—allowing malicious actors to swap images or redirect websites.
+
+$CHIMP sets `is_mutable: false` at CPI instantiation. Even the original deployer can never alter a single byte.

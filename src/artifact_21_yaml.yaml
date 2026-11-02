@@ -1,0 +1,28 @@
+version: "3.8"
+
+services:
+  chimp-sentinel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chimp-metaplex-sentinel
+    restart: unless-stopped
+    environment:
+      - SOLANA_RPC_ENDPOINT=https://api.mainnet-beta.solana.com
+      - SOLANA_WS_ENDPOINT=wss://api.mainnet-beta.solana.com
+      - PROGRAM_ID=Ch1mpVault1111111111111111111111111111111111
+      - CHIMP_MINT=Ch1mpFungib1e1111111111111111111111111111111
+      - CORE_COLLECTION=CoreCo11ection11111111111111111111111111111
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - POLL_INTERVAL_MS=3000
+    healthcheck:
+      test: ["CMD-SHELL", "node -e 'process.exit(0)'"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"

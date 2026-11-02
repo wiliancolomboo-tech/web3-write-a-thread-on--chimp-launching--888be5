@@ -1,0 +1,37 @@
+🧵 1/3
+$CHIMP is officially launching on @metaplex Core—Solana’s next-generation digital asset standard. 
+
+Why does this matter? Legacy NFT & token metadata architectures require up to 4 distinct on-chain accounts per asset, burdening communities with heavy rent and high compute fees. 
+
+Metaplex Core changes the game:
+Unified 1-account model
+Over 85% reduction in mint rent & network fees
+Native Digital Asset Standard (DAS) indexing out of the box
+
+Welcome to peak Solana engineering. 🍌⚡ #Solana #Metaplex $CHIMP
+
+---
+
+🧵 2/3
+Under the hood of the $CHIMP Core Engine:
+
+Instead of relying on fragmented external escrow contracts for staking and locking, $CHIMP harnesses Metaplex Core’s native Plugin Architecture. 
+
+Using native Transfer Delegate and dynamic Attributes plugins:
+1️⃣ Direct on-chain metadata evolution as your $CHIMP levels up
+2️⃣ Zero-escrow non-custodial staking via atomic freeze authority
+3️⃣ Clean, deterministic DAS RPC queries with sub-second latency via @heliuslabs / Triton
+
+Maximum security. Zero unnecessary compute bloat. 🛠️🦾
+
+---
+
+🧵 3/3
+The future of Solana community assets isn’t legacy Token Metadata—it’s single-account simplicity, uncompromised liquidity, and composable plugin governance.
+
+Part 1 sets the foundation: the master Collection & initial Apex assets are live on Devnet, fully automated with enterprise Slack/Discord telemetry.
+
+Part 2 drops tomorrow: Deep diving into $CHIMP hybrid liquidity pools and dynamic burn-to-earn mechanics. 
+
+Read the architecture doc & run the open-source client: https://github.com/sponsor-chimp/chimp-metaplex-launch
+Let the Chimp Era begin. 🚀🔥 @solana @metaplex

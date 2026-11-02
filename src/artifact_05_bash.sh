@@ -1,16 +1,15 @@
-# 1. Build and verify deterministic Anchor artifacts
+# 1. Clone repository and install dependencies
+git clone https://github.com/chimp-dao/chimp-metaplex-launch.git
+cd chimp-metaplex-launch
+yarn install
+
+# 2. Build Anchor program binary with reproducible Verifiable SVM build
 anchor build
 
-# 2. Deploy Anchor Program to Solana Devnet / Mainnet-Beta
-solana program deploy \
-  --program-id target/deploy/chimp_launchpad-keypair.json \
-  target/deploy/chimp_launchpad.so \
-  --url https://api.mainnet-beta.solana.com \
-  --keypair ~/.config/solana/id.json
+# 3. Configure network and deploy to Solana Devnet / Mainnet-Beta
+solana config set --url https://api.devnet.solana.com
+solana airdrop 2 $(solana address)
+anchor deploy --program-name chimp_launch
 
-# 3. Initialize Launchpad State via CLI
-yarn ts-node scripts/init-launchpad.ts \
-  --maxSupply 5000 \
-  --mintPrice 0.5 \
-  --royaltyBps 500 \
-  --treasury <YOUR_TREASURY_PUBKEY>
+# 4. Run full test suite with Localnet or Devnet Core Program
+anchor test --skip-local-validator

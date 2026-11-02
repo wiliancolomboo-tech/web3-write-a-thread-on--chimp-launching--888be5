@@ -1,0 +1,4 @@
++-------------------------------------------------------------+
+| Legacy:  [Mint] + [Metadata] + [Edition] + [TokenAccount]   |
+| $CHIMP:  [ Unified Metaplex Core Asset Account (~2.9k lam) ]|
++-------------------------------------------------------------+

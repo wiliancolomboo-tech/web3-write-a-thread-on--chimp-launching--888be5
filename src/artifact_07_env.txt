@@ -1,0 +1,5 @@
+ANCHOR_PROVIDER_URL=https://api.mainnet-beta.solana.com
+ANCHOR_WALLET=~/.config/solana/id.json
+PROGRAM_ID=Ch1mpLaunchpad111111111111111111111111111111
+DISCORD_WEBHOOK_URL=https://api.example.com/webhooks/alerts/placeholder
+SLACK_WEBHOOK_URL=https://api.example.com/webhooks/alerts/placeholder

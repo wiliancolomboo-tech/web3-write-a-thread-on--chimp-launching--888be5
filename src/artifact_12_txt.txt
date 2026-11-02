@@ -1,0 +1,2 @@
+Legacy Token Metadata: [Mint] + [Token Acc] + [Metadata] + [Master Edition] (4 Accounts)
+Metaplex Core:        [Single Asset Account] (1 Account)

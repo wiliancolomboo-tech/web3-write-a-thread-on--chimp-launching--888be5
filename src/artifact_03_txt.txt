@@ -1,0 +1,10 @@
+chimp-metaplex-launch/
+├── package.json
+├── tsconfig.json
+├── src/
+│   ├── config.ts
+│   ├── coreEngine.ts
+│   ├── threadPublisher.ts
+│   └── webhookService.ts
+└── tests/
+    └── launch.test.ts

@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  chimp-metaplex-node:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: chimp_metaplex_orchestrator
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - SOLANA_RPC_URL=${SOLANA_RPC_URL:-https://api.mainnet-beta.solana.com}
+      - ENTERPRISE_WEBHOOK_URL=${ENTERPRISE_WEBHOOK_URL}
+      - KEYPAIR_PATH=/app/keys/deployer.json
+    volumes:
+      - ./keys:/app/keys:ro
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "node", "dist/index.js", "healthcheck"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
