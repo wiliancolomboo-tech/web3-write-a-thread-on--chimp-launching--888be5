@@ -1,4 +1,4 @@
 SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
-DEPLOYER_SECRET_KEY=YOUR_BASE58_PRIVATE_KEY_HERE
+DEPLOYER_SECRET_KEY="mock_development_token_00000000000000"
 DISCORD_WEBHOOK_URL=https://api.example.com/webhooks/alerts/placeholder
 SLACK_WEBHOOK_URL=https://api.example.com/webhooks/alerts/placeholder
